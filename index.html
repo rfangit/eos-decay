@@ -54,7 +54,7 @@
     find which one is responsible.</p>
 
     <!-- ===================== WIDGET 1 ===================== -->
-    <h2>1. Which assumption drives the decay?</h2>
+    <h2>Which assumption drives the decay?</h2>
 
     <p>Mathematically, we can show that the only assumption that leads to strong decay is the $\nabla S$ null-space condition. 
       In general we have no reason to suspect $\nabla S$ lies in the null space of the Hessian. <strong>Thus this explains why we see decay in practice.</strong> </p>
@@ -94,10 +94,11 @@
 
     $$\frac{dx}{dt} = x\,y, \qquad \frac{dy}{dt} = \alpha - \lambda y - \beta\frac{x^2}{2}.$$
 
-    <p>where $\lambda$ corresponds to the eigenvalue of the direction $\nabla S$. We assume here that $\nabla S$ is an eigenvector: in general, it lies along many eigenvectors and the true equations
-    are high-dimensional. But as a minimal model, this sufficies to reproduce the qualitative oscillation decay behaviour.</p>
+    <p>where $\lambda$ corresponds to the eigenvalue of the direction $\nabla S$. We assume here that $\nabla S$ is an eigenvector: in general, 
+      it lies along many eigenvectors and the true equations
+    are high-dimensional. But as a minimal model, this suffices to qualitatively reproduce oscillation decay behaviour.</p>
 
-    <p>Below, we compare real data with a simplified model with only one or two eigenvalues. We also display the values of coefficients alpha and beta from a real trajectory</p>
+    <p>Below, we compare real data with a simplified model with only one or two eigenvalues, using $\alpha$ and $\beta$ from the real data.</p>
 
     <div class="tutorial-widget" id="w2-widget">
       <div class="controls-row">
@@ -146,7 +147,9 @@
       </p>
     </div>
 
-    <p>Mathematically one can show this minimal model with $\nabla S$ lying along a noznero eigenvalue, is equivalent to adding a drag to the 1d particle in a 1d potential. Thus energy is lost and the system eventually reaches a steady state. </p>
+    <p>Mathematically one can show this minimal model with $\nabla S$ lying along a nonzero eigenvalue,
+      is equivalent to adding a drag to the 1d particle in a 1d potential. Thus energy is lost and the
+      system eventually reaches a steady state. </p>
 
   </div><!-- /.tutorial-content -->
 </div><!-- /.container -->
