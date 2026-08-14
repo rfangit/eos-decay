@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why edge-of-stability oscillations decay — the ∇S mechanism</title>
+
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      chtml: { scale: 1.0 },
+      startup: { ready: () => { MathJax.startup.defaultReady(); window.mathJaxReady = true; } }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+  <img src="title.png" alt="" class="title-image">
+
+  <h1 class="page-title">Why do edge-of-stability oscillations decay?</h1>
+
+  <div class="tutorial-content">
+
+    <!-- ============================= INTRO ============================= -->
+    <p>Work on <em>self-stabilization</em> derived equations that accurately model
+    edge-of-stability (EOS) sharpness oscillations from a third-order Taylor expansion
+    of the loss around a stable reference point. We analyze these equations to understand why <strong>EOS oscillations almost always decay
+    in magnitude.</strong></p>
+
+    <p>The equations can be analyzed in simplified form via 5 assumptions:</p>
+    <ul>
+      <li>the eigenvectors and $\nabla S$ do not rotate,</li>
+      <li>the coefficients $\alpha = -\nabla L\cdot\nabla S$ and $\beta = \|\nabla S^\perp\|^2$ are constant,</li>
+      <li>$\nabla S\cdot u$ is negligible,</li>
+      <li>$\nabla S$ lies in the null space of the Hessian, and</li>
+      <li>the discrete updates can be modeled by continuous ODEs,</li>
+    </ul>
+    <p>Under these assumptions, you can show oscillation amplitude $x$ and sharpness offset $y$ evolve under</p>
+    $$\frac{dx}{dt} = x\,y, \qquad \frac{dy}{dt} = \alpha - \beta\frac{x^2}{2}.$$
+
+    <p>This system is equivalent exactly to a particle in a 1D potential well,
+    $w'' = -V'(w)$ with $V(w) = \alpha\big(\tfrac12(e^{2w}-1) - w\big)$ and
+    $w = \log(X/\delta)$. The energy $E = \tfrac12(w')^2 + V(w)$ is conserved, so the
+    orbits are <em>stable</em> and the oscillations never change amplitude. <strong>That
+    cannot explain the decay.</strong></p>
+
+    <p>We systematically relax the assumptions to
+    find which one is responsible.</p>
+
+    <!-- ===================== WIDGET 1 ===================== -->
+    <h2>1. Which assumption drives the decay?</h2>
+
+    <p>Mathematically, we can show that the only assumption that leads to strong decay is the $\nabla S$ null-space condition. 
+      In general we have no reason to suspect $\nabla S$ lies in the null space of the Hessian. <strong>Thus this explains why we see decay in practice.</strong> </p>
+
+    <p>We show this empirically below. Training a neural network on a Chebyshev polynomial or on CIFAR10 results in EOS oscillations, that are well predicted by the self-stability equations. 
+      We apply several assumptions to the self-stability equations: empirically, rotation and $\nabla S\cdot u$ are negligible.
+      But enforcing $\nabla S$ in the null-space leads to large discrepancies, with oscillations of growing amplitude (this can be proven directly from the equations as well).
+    </p>
+
+    <p>Below, the black curve is real gradient descent and the red curve is the full self stability equations. Each checkbox allows us to view the effect of applying a single assumption to the equations.</p>
+
+    <div class="tutorial-widget" id="w1-widget">
+      <div class="controls-row">
+        <label>task: <select id="w1-task"></select></label>
+        <label class="chk"><input type="checkbox" id="w1-chk-rotation" checked> no rotation</label>
+        <label class="chk"><input type="checkbox" id="w1-chk-along_u" checked> $\nabla S\cdot u = 0$</label>
+        <label class="chk"><input type="checkbox" id="w1-chk-nablaS" checked> $H\nabla S = 0$</label>
+        <label class="sep">show:
+          <select id="w1-observable">
+            <option value="S">sharpness $S$</option>
+            <option value="absx">amplitude $|x|$</option>
+          </select>
+        </label>
+        <span id="w1-status" class="status">loading…</span>
+      </div>
+      <div class="plot-box tall" id="w1-dropzone">
+        <div class="plot-content"><canvas id="w1-chart" class="plot-canvas"></canvas></div>
+      </div>
+      <p class="widget-caption">
+        <span class="muted">(You can also drag <code>.npz</code> run files onto the plot.)</span>
+      </p>
+    </div>
+
+    <!-- ===================== MECHANISM ===================== -->
+    <h2>A Minimal Model Of Oscillation Decay</h2>
+
+    <p>This suggests a minimal model for oscillation decay as follows:</p>
+
+    $$\frac{dx}{dt} = x\,y, \qquad \frac{dy}{dt} = \alpha - \lambda y - \beta\frac{x^2}{2}.$$
+
+    <p>where $\lambda$ corresponds to the eigenvalue of the direction $\nabla S$. We assume here that $\nabla S$ is an eigenvector: in general, it lies along many eigenvectors and the true equations
+    are high-dimensional. But as a minimal model, this sufficies to reproduce the qualitative oscillation decay behaviour.</p>
+
+    <p>Below, we compare real data with a simplified model with only one or two eigenvalues. We also display the values of coefficients alpha and beta from a real trajectory</p>
+
+    <div class="tutorial-widget" id="w2-widget">
+      <div class="controls-row">
+        <label>task: <select id="w2-task"></select></label>
+        <span>step: <b id="w2-stepValue">0</b></span>
+        <label class="sep">show:
+          <select id="w2-observable">
+            <option value="S">sharpness $S$</option>
+            <option value="absx">amplitude $|x|$</option>
+          </select>
+        </label>
+        <span id="w2-status" class="status"></span>
+      </div>
+
+      <div class="plot-box short">
+        <div class="plot-content"><canvas id="w2-trackChart" class="plot-canvas"></canvas></div>
+      </div>
+
+      <div class="controls-row lambda-row">
+        <span>$\lambda$:</span>
+        <input type="range" id="w2-lambdaSlider" min="0" max="1000" value="500">
+        <b id="w2-lambdaValue">—</b>
+        <span id="w2-lambdaNote" class="status"></span>
+        <label class="chk sep"><input type="checkbox" id="w2-twoMode"> two eigenvalues</label>
+      </div>
+
+      <div class="controls-row two-mode-row" id="w2-twoModeControls" style="display:none;">
+        <span>$\lambda_2/\lambda_1$:</span>
+        <input type="range" id="w2-lambda2Slider" min="1" max="100" value="10">
+        <b id="w2-lambda2Value">—</b>
+        <span class="spacer">·</span>
+        <span>weight $p_2$:</span>
+        <input type="range" id="w2-p2Slider" min="0" max="100" value="30">
+        <b id="w2-p2Value">—</b>
+      </div>
+
+      <div class="plot-box tall">
+        <div class="plot-content"><canvas id="w2-simChart" class="plot-canvas"></canvas></div>
+      </div>
+      <p class="widget-caption">
+        Live minimal model (orange) vs. real GD (black). At small $\lambda$ the
+        discrete map spirals outward and eventually blows up — this is the
+        discreteness of the equations (effectively the forward-Euler energy-drift
+        problem for conserved dynamics). Above a threshold $\lambda > 2\eta\alpha$
+        the oscillations decay to the fixed point.
+      </p>
+    </div>
+
+    <p>Mathematically one can show this minimal model with $\nabla S$ lying along a noznero eigenvalue, is equivalent to adding a drag to the 1d particle in a 1d potential. Thus energy is lost and the system eventually reaches a steady state. </p>
+
+  </div><!-- /.tutorial-content -->
+</div><!-- /.container -->
+
+<script type="module">
+  import { initAssumptionsWidget } from './widget_assumptions.js';
+  import { initMinimalWidget } from './widget_minimal.js';
+
+  // Register your tasks here: label shown to the reader -> folder under data/.
+  // Each folder holds the files listed in the "Using your own data" table.
+  const TASKS = {
+    'Chebyshev': 'cheb',
+    'CIFAR-10':  'cifar',
+  };
+  // Widget 2 may cap plotting per task: pass { folder, plotSteps } instead of a
+  // bare folder string. Chebyshev is capped to 2000 steps.
+  const TASKS_W2 = {
+    'Chebyshev': { folder: 'cheb', plotSteps: 2000 },
+    'CIFAR-10':  { folder: 'cifar' },
+  };
+
+  function whenReady(fn, n = 0) {
+    if (typeof window.Chart !== 'undefined') return fn();
+    if (n > 100) {
+      const s = document.getElementById('w1-status');
+      if (s) { s.textContent = 'Chart.js failed to load (check network/CDN).'; s.style.color = '#c0392b'; }
+      return;
+    }
+    setTimeout(() => whenReady(fn, n + 1), 100);
+  }
+
+  whenReady(() => {
+    initAssumptionsWidget('w1', { dataDir: 'data', tasks: TASKS });
+    initMinimalWidget('w2',    { dataDir: 'data', tasks: TASKS_W2 });
+  });
+</script>
+
+</body>
+</html>
